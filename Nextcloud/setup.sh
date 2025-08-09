@@ -17,7 +17,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     echo -e "${RED}Файл $CONFIG_FILE не найден!${NC}"
     echo -e "${YELLOW}Создаю шаблон файла конфигурации...${NC}"
     
-    cat > "$CONFIG_FILE" << 'EOF'
+    cat > "$CONFIG_FILE" << EOF
 # Настройки доменов
 NEXTCLOUD_DOMAIN="nextcloud.yourdomain.com"
 TRAEFIK_DOMAIN="traefik.yourdomain.com"
