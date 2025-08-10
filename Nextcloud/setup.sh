@@ -143,7 +143,7 @@ services:
     networks:
       - nextcloud
 
-app:
+  app:
     image: nextcloud:29.0.16-apache
     container_name: nextcloud-app
     restart: unless-stopped
