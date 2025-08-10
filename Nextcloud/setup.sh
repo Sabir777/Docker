@@ -143,8 +143,8 @@ services:
     networks:
       - nextcloud
 
-  app:
-    image: nextcloud:28-apache
+app:
+    image: nextcloud:29.0.16-apache
     container_name: nextcloud-app
     restart: unless-stopped
     volumes:
@@ -163,6 +163,7 @@ services:
       - OVERWRITEPROTOCOL=https
       - OVERWRITEHOST=${NEXTCLOUD_DOMAIN}
       - APACHE_DISABLE_REWRITE_IP=1
+      - TRUSTED_PROXIES=traefik
     depends_on:
       - db
       - redis
@@ -172,15 +173,19 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.nextcloud.rule=Host(\`${NEXTCLOUD_DOMAIN}\`)"
       - "traefik.http.routers.nextcloud.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.nextcloud.middlewares=nextcloud-headers"
+      - "traefik.http.routers.nextcloud.middlewares=nextcloud-headers,nextcloud-redirectregex"
       - "traefik.http.middlewares.nextcloud-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
-      - "traefik.http.middlewares.nextcloud-headers.headers.customrequestheaders.X-Forwarded-For="
+      - "traefik.http.middlewares.nextcloud-headers.headers.referrerPolicy=no-referrer"
       - "traefik.http.middlewares.nextcloud-headers.headers.stsSeconds=31536000"
       - "traefik.http.middlewares.nextcloud-headers.headers.stsIncludeSubdomains=true"
       - "traefik.http.middlewares.nextcloud-headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.nextcloud-headers.headers.customFrameOptionsValue=SAMEORIGIN"
+      - "traefik.http.middlewares.nextcloud-redirectregex.redirectregex.permanent=true"
+      - "traefik.http.middlewares.nextcloud-redirectregex.redirectregex.regex=^https://(.*)/.well-known/(card|cal)dav"
+      - "traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement=https://\$\${1}/remote.php/dav/"
 
   cron:
-    image: nextcloud:28-apache
+    image: nextcloud:29.0.16-apache
     container_name: nextcloud-cron
     restart: unless-stopped
     volumes:
