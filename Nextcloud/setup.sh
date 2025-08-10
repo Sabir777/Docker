@@ -26,10 +26,11 @@ TRAEFIK_DOMAIN="traefik.yourdomain.com"
 LETSENCRYPT_EMAIL="your-email@example.com"
 
 # Пароли (сгенерируйте сильные пароли!)
-MYSQL_ROOT_PASSWORD="$(openssl rand -base64 32)"
-MYSQL_PASSWORD="$(openssl rand -base64 32)"
-REDIS_PASSWORD="$(openssl rand -base64 32)"
-NEXTCLOUD_ADMIN_PASSWORD="$(openssl rand -base64 32)"
+MYSQL_ROOT_PASSWORD="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=')"
+MYSQL_PASSWORD="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=')"
+REDIS_PASSWORD="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=')"
+NEXTCLOUD_ADMIN_PASSWORD="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=')"
+
 
 # Имя администратора Nextcloud
 NEXTCLOUD_ADMIN_USER="admin"
@@ -107,7 +108,7 @@ services:
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik-acme:/acme.json
+      - ./acme.json:/acme.json
     networks:
       - traefik
       - nextcloud
@@ -216,7 +217,6 @@ services:
 volumes:
   nextcloud:
   db:
-  traefik-acme:
 
 networks:
   traefik:
@@ -285,6 +285,10 @@ EOF
 # Установка прав доступа
 chmod 600 nextcloud-config/php.ini db-config/my.cnf
 chmod 755 backups
+
+# Создание файла acme.json с правильными правами
+touch acme.json
+chmod 600 acme.json
 
 echo -e "${GREEN}=== Настройка завершена! ===${NC}"
 echo ""
