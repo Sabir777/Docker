@@ -1,0 +1,16 @@
+api:
+  dashboard: true
+  insecure: true  # Только для начала!
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+# Пока без SSL - добавим на следующем этапе
