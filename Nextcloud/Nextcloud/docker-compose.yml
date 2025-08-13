@@ -27,6 +27,70 @@ services:
     image: nextcloud:29.0.16-apache
     container_name: nextcloud-app
     restart: unless-stopped
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=db
+      - REDIS_HOST=redis
+      - OVERWRITEHOST=your-domain.com
+      - OVERWRITEPROTOCOL=https
+    depends_on:
+      - db
+      - redis
+    networks:
+      - nextcloud
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`your-domain.com`)"
+      - "traefik.http.routers.nextcloud.entrypoints=web"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+
+volumes:
+  db:
+  nextcloud:
+
+networks:
+  nextcloud:
+    driver: bridge
+  traefik:
+    external: true
+
+
+
+
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.11
+    container_name: nextcloud-db
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    networks:
+      - nextcloud
+
+  redis:
+    image: redis:alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+    networks:
+      - nextcloud
+
+  app:
+    image: nextcloud:29.0.16-apache
+    container_name: nextcloud-app
+    restart: unless-stopped
     ports:
       - "8081:80"  # Временный порт для тестирования
     volumes:
@@ -50,3 +114,4 @@ volumes:
 networks:
   nextcloud:
     driver: bridge
+
