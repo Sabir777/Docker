@@ -1,0 +1,3 @@
+[submodule "Nextcloud"]
+	path = Nextcloud
+	url = git@github.com:Sabir777/Nextcloud.git
